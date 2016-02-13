@@ -5,10 +5,19 @@ var gulp = require('gulp'),
     source = require('vinyl-source-stream'),
     browserSync = require('browser-sync');
 
+var src_url_browserify = 'src/sketch.js',
+    dest_url_browserify = 'public/javascripts/',
+    output_file_name_browserify = 'sketch.js',
+    src_url_watch_js = 'src/**/*.js',
+    base_dir_serve = 'public/dist',
+    src_url_sass = 'src/**/*.scss',
+    dest_url_sass = 'public/stylesheets/';
+
+
 //browserify
 gulp.task('browserify',function (){
   browserify({
-    entries: 'app/src/sketch.js',
+    entries: src_url_browserify,
     extensions: ['.js']
   })
   .transform(babelify,{presets: ['es2015']},{ debug: true })
@@ -18,28 +27,26 @@ gulp.task('browserify',function (){
 			console.log('Error : ' + err.message);
 			this.emit('end');
 		})
-    .pipe(source('sketch.js'))
-  	.pipe(gulp.dest('app/dist'))
+    .pipe(source(output_file_name_browserify))
+  	.pipe(gulp.dest(dest_url_browserify))
     .pipe(browserSync.stream());
 });
 
-//server
-gulp.task('serve', function() {
-    browserSync.init({
-        server: {
-            baseDir: 'app/dist'
-        }
-    });
+//sass
+gulp.task('sass',function(){
+  return gulp.src(src_url_sass)
+    .pipe(gulpPlugins.sass().on('error', gulpPlugins.sass.logError))
+    .pipe(gulp.dest(dest_url_sass))
+    .pipe(browserSync.stream());
 });
 
 //watch
 gulp.task('watch', function() {
-  var targets = [
-    'app/src/**/*.js',
-  ];
-  gulp.watch(targets, ['browserify']);
-  gulp.watch('app/dist/*.html').on('change', browserSync.reload);
+  var targetsJs = [src_url_watch_js];
+  var targetsCss = [src_url_sass];
+  gulp.watch(targetsJs, ['browserify']);
+  gulp.watch(targetsCss, ['sass']);
 });
 
 
-gulp.task('default',['serve','watch']);
+gulp.task('default',['watch']);

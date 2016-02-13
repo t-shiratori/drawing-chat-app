@@ -1,32 +1,29 @@
-body{
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   font-size: 18px;
-  line-height: 1;
-}
+  line-height: 1; }
 
-div,p{
+div, p {
   margin: 0;
   padding: 0;
-  font-size: 14px;
-}
+  font-size: 14px; }
 
-#panelInnerBox{
+#panelInnerBox {
   position: relative;
   top: 0;
-  left: 0;
-}
-#chatMemberNum{
+  left: 0; }
+
+#chatMemberNum {
   width: 5em;
-  color: #555;
-}
-#clearBtn{
-  width: 10em;
-}
-#colorPicker__selectSatBri{
-  line-height: 0;
-}
-#colorPicker__selectHue{
-  line-height: 0;
-}
+  color: #555; }
+
+#clearBtn {
+  width: 10em; }
+
+#colorPicker__selectSatBri {
+  line-height: 0; }
+
+#colorPicker__selectHue {
+  line-height: 0; }
