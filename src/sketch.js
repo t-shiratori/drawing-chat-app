@@ -1,10 +1,5 @@
 'use strict';
 
-//import
-import P5 from 'p5';
-
-
-
 //socket io
 let socket;
 
@@ -30,6 +25,8 @@ let chatInfo;
 let chatNum;
 let colorPicker__selectSatBri;
 let colorPicker__selectHue;
+let ttlSliderAlpha;
+let ttlSliderBorderW;
 let sliderAlpha;
 let sliderBorderW;
 
@@ -44,13 +41,16 @@ let pickerHue = 360;
 ------------------------------------*/
 let scketch = function(p){
 
-  let mainCanvas;
+  console.log(p);
+
+  let thisRenderer2dObj;
 
   p.setup = function(){
     p.frameRate(40);
-    mainCanvas = p.createCanvas(p.windowWidth, p.windowHeight);
-    mainCanvas.parent('mainCanvasWrapper');
-    mainCanvas.id('mainCanvas');
+    thisRenderer2dObj = p.createCanvas(p.windowWidth, p.windowHeight);
+    thisRenderer2dObj.parent('mainCanvasWrapper');
+    thisRenderer2dObj.id('mainCanvas');
+    console.log(thisRenderer2dObj);
     //p.blendMode(p.ADD);
     p.background(255);
     //p.color() で送るとサーバーから受け取るときに型がp5から普通のobjectに変わってしまうのでだめ
@@ -61,15 +61,19 @@ let scketch = function(p){
     --------------------------------------*/
     panel = p.createDiv('');
     panel.id('panel');
-    panel.position(10,10);
 
     panelInnerBox = p.createDiv('');
     panelInnerBox.id('panelInnerBox');
     panel.child(panelInnerBox);
 
+    chatNum = p.createP('');
+    chatNum.id('chatMemberNum');
+    panelInnerBox.child('chatMemberNum');
+    panelInnerBox.child(chatNum);
+
     selectBox = p.createSelect();
     selectBox.id('selectPattern');
-    selectBox.position(0, 0);
+    selectBox.class('form-control');
     selectBox.option('path');
     selectBox.option('line');
     selectBox.option('circle');
@@ -81,7 +85,7 @@ let scketch = function(p){
 
     clearBtn = p.createButton('clear canvas');
     clearBtn.id('clearBtn');
-    clearBtn.position(100, 0);
+    clearBtn.class('btn btn-default');
     clearBtn.mouseClicked(clearCanvas);
     panelInnerBox.child(clearBtn);
 
@@ -89,22 +93,21 @@ let scketch = function(p){
     // chatInfo.id('chatInfo');
     // panelInnerBox.child(chatInfo);
 
-    chatNum = p.createP('');
-    chatNum.id('chatMemberNum');
-    panelInnerBox.child('chatMemberNum');
-    chatNum.position(240,0);
-    panelInnerBox.child(chatNum);
+    ttlSliderAlpha = p.createP('alpha');
+    ttlSliderAlpha.id('ttlSliderAlpha');
+    panelInnerBox.child(ttlSliderAlpha);
 
     sliderAlpha = p.createSlider(0,255,100);
     sliderAlpha.id('sliderAlpha');
-    sliderAlpha.position(150,40);
     panelInnerBox.child(sliderAlpha);
+
+    ttlSliderBorderW = p.createP('border width');
+    ttlSliderBorderW.id('ttlSliderBorderW');
+    panelInnerBox.child(ttlSliderBorderW);
 
     sliderBorderW = p.createSlider(1,40,10);
     sliderBorderW.id('sliderBorderW');
-    sliderBorderW.position(150,70);
     panelInnerBox.child(sliderBorderW);
-
 
     //myColor = [p.floor(p.random(255)),p.floor(p.random(255)),p.floor(p.random(255)),100];
     myColor = [0,0,0,sliderAlpha.value()];
@@ -173,7 +176,7 @@ let scketch = function(p){
 
   p.mouseDragged = function(e) {
     let t = e.srcElement || e.target;//for ie
-    if(t == mainCanvas.canvas){
+    if(t == thisRenderer2dObj.canvas){
       //スライダー操作の時に反応しないようにcanvasかどうか判定
       p.cursor(p.CROSS);
 
@@ -303,3 +306,184 @@ let scketch = function(p){
 
 }
 new p5(scketch);
+
+
+
+
+
+
+
+
+
+/*--
+
+  canvas colorPicker saturation brightness
+
+------------------------------------*/
+let colorPicker__selectSatBriSketch = function(p){
+
+  let pd;
+  let cvsW = 100;
+  let cvsH = 100;
+  let thisRenderer2dObj;
+
+  p.setup = function(){
+    p.background(0);
+    p.colorMode(p.HSB, cvsW);
+    pd = p.pixelDensity();
+    colorPicker__selectSatBri = p.createDiv('');
+    colorPicker__selectSatBri.id('colorPicker__selectSatBri');
+    panelInnerBox.child(colorPicker__selectSatBri);
+    thisRenderer2dObj = p.createCanvas(cvsW, cvsH);
+    thisRenderer2dObj.mousePressed(changeColor);//こうするとthisRenderer2dObjがクリックされた時だけ呼び出されるのでmainCanvasに影響しない。
+    thisRenderer2dObj.parent("colorPicker__selectSatBri");
+    p.noLoop();
+  }
+
+  p.draw = function(){
+    p.colorMode(p.HSB, 100);
+    drawColor();
+    p.loadPixels();
+  }
+
+  p.mousePressed = function(e){
+    //ここはmainCanvasもクリックを検知してしまうので注意
+  }
+
+  function changeColor(e){
+    /*
+    noLoopしてるとmouseXなどが全部0で返ってくる仕様らしい。なのでeで普通にclientXのほうを使う。
+    https://github.com/processing/p5.js/issues/1205
+    */
+    p.cursor(p.CROSS);
+    let mx = e.offsetX;//http://phpjavascriptroom.com/?t=js&p=event_object
+    let my = e.offsetY;
+
+    //ピクセルの色取得
+    let pos = (4 * cvsW * pd * my) + (4 * mx * pd);
+    let r = p.pixels[pos];//画像の場合はp.getでいけるがcanvasの塗りの場合はp.pixels[]でやる必要がある
+    let g = p.pixels[pos+1];
+    let b = p.pixels[pos+2];
+
+    myColor[0] = r;
+    myColor[1] = g;
+    myColor[2] = b;
+
+  }
+
+  function drawColor(){
+    for (let i = 0; i < 100; i++) {
+      for (let j = 0; j < 100; j++) {
+        p.stroke(pickerHue, 100-j, i);
+        p.point(i, j);
+      }
+    }
+  }
+
+}
+colorPickerSelectSatBriSketch_p5 = new p5(colorPicker__selectSatBriSketch);
+
+
+
+/*--
+
+  canvas colorPicker hue
+
+------------------------------------*/
+let colorPicker__selectHueSkech = function(p){
+
+  let pd;
+  let cvsW = 100;
+  let cvsH = 15;
+  let thisRenderer2dObj;
+
+  p.setup = function(){
+    p.background(0);
+    p.colorMode(p.HSB, cvsW);
+    pd = p.pixelDensity();
+    colorPicker__selectHue = p.createDiv('');
+    colorPicker__selectHue.id('colorPicker__selectHue');
+    panelInnerBox.child(colorPicker__selectHue);
+    thisRenderer2dObj = p.createCanvas(cvsW, cvsH);
+    thisRenderer2dObj.mousePressed(changeColor);//こうするとthisRenderer2dObjがクリックされた時だけ呼び出されるのでmainCanvasに影響しない。
+    thisRenderer2dObj.parent("colorPicker__selectHue");
+
+    p.noLoop();
+  }
+
+  p.draw = function(){
+    p.colorMode(p.HSB, 100);
+    for (let k = 0; k < cvsW; k++) {
+      for (let h = 0; h < cvsH; h++) {
+        p.stroke(k, 100, 100);
+        p.point(k, h);
+      }
+    }
+    p.loadPixels();
+  }
+
+  p.mousePressed = function(e){
+    //ここはmainCanvasもクリックを検知してしまうので注意
+  }
+
+  function changeColor(e){
+    /*
+    noLoopしてるとmouseXなどが全部0で返ってくる仕様らしい。なのでeで普通にclientXのほうを使う。
+    https://github.com/processing/p5.js/issues/1205
+    */
+    p.cursor(p.CROSS);
+    let mx = e.offsetX;//http://phpjavascriptroom.com/?t=js&p=event_object
+    let my = e.offsetY;
+
+    //ピクセルの色取得
+    let pos = (4 * cvsW * pd * my) + (4 * mx * pd);
+    let r = p.pixels[pos];//画像の場合はp.getでいけるがcanvasの塗りの場合はp.pixels[]でやる必要がある
+    let g = p.pixels[pos+1];
+    let b = p.pixels[pos+2];
+
+    //RGBからHSB変換 hueのみ
+    let hue;
+    let max = p.max(r,g,b);
+    let min = p.min(r,g,b);
+
+    if(max == r){
+      hue = ((g-b)/(max-min)) * 60;
+    }else if(max == g){
+      hue = ((b-r)/(max-min)) * 60 + 120;
+    }else if(max == b){
+      hue = ((r-g)/(max-min)) * 60 + 240;
+    }else if(r == g && g == b){
+      hue = 0;
+    }
+
+    if(hue<0){
+      hue += 360;
+    }
+
+    hue = p.floor(hue);
+
+    hue = p.map(hue,0,360,0,100);
+
+    //
+    pickerHue = hue;
+    colorPickerSelectSatBriSketch_p5.draw();
+
+    myColor[0] = r;
+    myColor[1] = g;
+    myColor[2] = b;
+
+    // console.log('pixels :',p.pixels);
+    // console.log('pixels len :',p.pixels.length);
+    // console.log('mx:',mx);
+    // console.log('my:',my);
+    // console.log('r:',r);
+    // console.log('g:',g);
+    // console.log('b:',b);
+    // console.log(colorPickerSelectSatBriSketch_p5);
+    // console.log(pos);
+    // console.log(my);
+    // console.log(myColor);
+  }
+}
+new p5(colorPicker__selectHueSkech);
+console.log(colorPicker__selectHueSkech);
