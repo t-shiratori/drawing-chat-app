@@ -24,6 +24,7 @@ var selectBox = undefined;
 var clearBtn = undefined;
 var ttl = undefined;
 var chatInfo = undefined;
+var ttlChatNum = undefined;
 var chatNum = undefined;
 var colorPicker__selectSatBri = undefined;
 var colorPicker__selectHue = undefined;
@@ -67,9 +68,12 @@ var scketch = function scketch(p) {
     panelInnerBox.id('panelInnerBox');
     panel.child(panelInnerBox);
 
+    ttlChatNum = p.createP('number of people');
+    ttlChatNum.id('ttlChatNum');
+    panelInnerBox.child('ttlChatNum');
+
     chatNum = p.createP('');
-    chatNum.id('chatMemberNum');
-    panelInnerBox.child('chatMemberNum');
+    chatNum.id('chatNum');
     panelInnerBox.child(chatNum);
 
     selectBox = p.createSelect();
@@ -127,8 +131,8 @@ var scketch = function scketch(p) {
 
     //
     socket.on('chatInfoUpdate', function (chatData) {
-      var chatMemberNum = document.getElementById('chatMemberNum');
-      chatMemberNum.innerHTML = '人数: ' + chatData.length;
+      var chatNum = document.getElementById('chatNum');
+      chatNum.innerHTML = chatData.length;
     });
 
     //

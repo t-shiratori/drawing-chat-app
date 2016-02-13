@@ -22,6 +22,7 @@ let selectBox;
 let clearBtn;
 let ttl;
 let chatInfo;
+let ttlChatNum;
 let chatNum;
 let colorPicker__selectSatBri;
 let colorPicker__selectHue;
@@ -66,9 +67,12 @@ let scketch = function(p){
     panelInnerBox.id('panelInnerBox');
     panel.child(panelInnerBox);
 
+    ttlChatNum = p.createP('number of people');
+    ttlChatNum.id('ttlChatNum');
+    panelInnerBox.child('ttlChatNum');
+
     chatNum = p.createP('');
-    chatNum.id('chatMemberNum');
-    panelInnerBox.child('chatMemberNum');
+    chatNum.id('chatNum');
     panelInnerBox.child(chatNum);
 
     selectBox = p.createSelect();
@@ -127,8 +131,8 @@ let scketch = function(p){
 
     //
     socket.on('chatInfoUpdate',function(chatData){
-      let chatMemberNum = document.getElementById('chatMemberNum');
-      chatMemberNum.innerHTML= '人数: ' + chatData.length;
+      let chatNum = document.getElementById('chatNum');
+      chatNum.innerHTML = chatData.length;
     });
 
     //

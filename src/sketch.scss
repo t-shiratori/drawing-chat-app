@@ -29,9 +29,10 @@ div,p{
   p{
     margin-bottom: 10px;
     color: #ddd;
+    letter-spacing: 0.05em;
   }
-  #chatMemberNum{
-    width: 5em;
+  #ttlChatNum{}
+  #chatNum{
     margin-bottom: 20px;
   }
   #selectPattern{
