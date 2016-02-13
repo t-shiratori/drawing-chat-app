@@ -31,11 +31,8 @@ div, p {
   #panelInnerBox #chatMemberNum {
     width: 5em;
     margin-bottom: 20px; }
-  #panelInnerBox #selectPattern {
-    height: 28px; }
   #panelInnerBox #clearBtn {
-    width: 8em;
-    padding: 2px 5px; }
+    width: 8em; }
   #panelInnerBox #sliderAlpha {
     width: 100px; }
   #panelInnerBox #sliderBorderW {
