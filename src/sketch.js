@@ -201,7 +201,7 @@ let scketch = function(p){
       p.cursor(p.CROSS);
 
       //前回と今回のマウス座標の差を利用する
-      if(myPrevP.x == -9999){//初回時のみmyPrevPにmyCurrentPの値を入れてやる
+      if(myPrevP.x == -9999){//ドラッグ開始時のみmyPrevPにmyCurrentPの値を入れてやる
         myCurrentP.x = e.offsetX;
         myCurrentP.y = e.offsetY;
         myPrevP.x = myCurrentP.x;
@@ -241,7 +241,10 @@ let scketch = function(p){
     if(t == thisRenderer2dObj.canvas){
       myDragFlag = false;
       myHistoryPoints = [];
-      myData = {mx:myCurrentP.x, my:myCurrentP.y, pmx:myPrevP.x, pmy:myPrevP.y, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+      myPrevP.x = -9999;
+      myPrevP.y = -9999;
+      myData.drag = myDragFlag;
+      myData.historyPoints = myHistoryPoints;
       socket.emit('getClientInfo',myData);
     }
   }
