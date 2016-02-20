@@ -215,7 +215,6 @@ let scketch = function(p){
 
       p.cursor(p.CROSS);
 
-      //前回と今回のマウス座標の差を利用する
       if(myPrevP.x == -9999){//ドラッグ開始時のみmyPrevPにmyCurrentPの値を入れてやる
         myCurrentP.x = e.offsetX;
         myCurrentP.y = e.offsetY;
@@ -226,6 +225,7 @@ let scketch = function(p){
         myCurrentP.y = e.offsetY;
       }
 
+      //前回と今回のマウス座標の差を利用するのでとっておく
       let diff = p.sqrt(p.pow(myCurrentP.x - myPrevP.x,2) + p.pow(myCurrentP.y - myPrevP.y,2));
       diff *= 0.01;
       p.constrain(diff,1,180);
@@ -235,7 +235,7 @@ let scketch = function(p){
       myAngle += 1;
       myAngle = myAngle % 360;
 
-      //座標ヒストリー
+      //座標ヒストリー保存
       let point = {x:myCurrentP.x,y:myCurrentP.y};
       myHistoryPoints.push(point);
 
