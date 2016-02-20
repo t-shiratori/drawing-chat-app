@@ -14,6 +14,8 @@ let myAngle = 0;
 let myDiff = 0;
 let myPattern = 'path';
 let myBorderW;
+let myDragFlag = false;
+let myHistoryPoints = [];
 
 //dom
 let panel;
@@ -113,7 +115,7 @@ let scketch = function(p){
     //myColor = [p.floor(p.random(255)),p.floor(p.random(255)),p.floor(p.random(255)),100];
     myColor = [0,0,0,sliderAlpha.value()];
     myPattern = selectBox.value();
-    myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, clr:myColor, drag: false, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+    myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
 
 
     /*--
@@ -177,6 +179,13 @@ let scketch = function(p){
 
   }// end draw
 
+  p.mousePressed = function(e){
+    let t = e.srcElement || e.target;//for ie
+    if(t == thisRenderer2dObj.canvas){
+      myDragFlag = true;
+    }
+  }
+
   p.mouseDragged = function(e) {
     let t = e.srcElement || e.target;//for ie
 
@@ -195,19 +204,28 @@ let scketch = function(p){
       myAngle += 1;
       myAngle = myAngle % 360;
 
-      //データをセット
-      myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, clr:myColor, drag: true, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+      let point = {x:p.mouseX,y:p.mouseY};
+      myHistoryPoints.push(point);
 
-      console.log(myData);
+      //データをセット
+      myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+
       //サーバーに送信
       socket.emit('getClientInfo',myData);
+
     };
 
   };
 
-  p.mouseReleased = function(){
-    myData.drag = false;
-    socket.emit('getClientInfo',myData);
+  p.mouseReleased = function(e){
+    let t = e.srcElement || e.target;//for ie
+    if(t == thisRenderer2dObj.canvas){
+      myDragFlag = false;
+      myHistoryPoints = [];
+      myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+      socket.emit('getClientInfo',myData);
+    }
+
   }
 
   p.windowResized = function() {
@@ -226,8 +244,10 @@ let scketch = function(p){
       //p.translate(cltObj.mx,cltObj.my);
       //p.line(cltObj.mx,cltObj.my,cltObj.pmx,cltObj.pmy);
       p.beginShape();
-      p.vertex(cltObj.pmx,cltObj.pmy);
-      p.vertex(cltObj.mx,cltObj.my);
+      for(let i = 0; i<cltObj.historyPoints.length; i++){
+        let h = cltObj.historyPoints[i];
+        p.vertex(h.x,h.y);
+      }
       p.endShape();
     p.pop();
   }
@@ -444,7 +464,7 @@ let colorPicker__selectHueSkech = function(p){
 
   function changeColor(e){
     /*
-    noLoopしてるとmouseXなどが全部0で返ってくる仕様らしい。なのでeで普通にclientXのほうを使う。
+    最新のp5だとnoLoopにした場合mouseXなどが全部0で返ってくるらしい。バグかは不明。なのでeで普通にclientXのほうを使う。
     https://github.com/processing/p5.js/issues/1205
     */
     p.cursor(p.CROSS);
