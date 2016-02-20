@@ -215,6 +215,7 @@ let scketch = function(p){
 
       p.cursor(p.CROSS);
 
+      //前回と今回のマウス座標
       if(myPrevP.x == -9999){//ドラッグ開始時のみmyPrevPにmyCurrentPの値を入れてやる
         myCurrentP.x = e.offsetX;
         myCurrentP.y = e.offsetY;
@@ -270,6 +271,7 @@ let scketch = function(p){
       //サーバーに送信
       socket.emit('getClientInfo',myData);
 
+      //前回のマウス座標を更新
       myPrevP.x = myCurrentP.x;
       myPrevP.y = myCurrentP.y;
 
