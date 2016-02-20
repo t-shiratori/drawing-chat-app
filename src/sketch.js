@@ -154,8 +154,7 @@ let scketch = function(p){
     //p.fill(255,255,255,50);
     //p.rect(0,0,p.windowWidth, p.windowHeight);
 
-    myColor[3] = sliderAlpha.value();
-    myBorderW = sliderBorderW.value();
+
 
     for(let key in clientsObj) {
       if(clientsObj.hasOwnProperty(key)) {
@@ -222,6 +221,9 @@ let scketch = function(p){
 
       let point = {x:myCurrentP.x,y:myCurrentP.y};
       myHistoryPoints.push(point);
+
+      myColor[3] = sliderAlpha.value();
+      myBorderW = sliderBorderW.value();
 
       //データをセット
       myData = {mx:myCurrentP.x, my:myCurrentP.y, pmx:myPrevP.x, pmy:myPrevP.y, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
