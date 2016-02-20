@@ -78,18 +78,6 @@ let scketch = function(p){
     chatNum.id('chatNum');
     panelInnerBox.child(chatNum);
 
-    selectBox = p.createSelect();
-    selectBox.id('selectPattern');
-    selectBox.class('form-control');
-    selectBox.option('path');
-    selectBox.option('line');
-    selectBox.option('circle');
-    selectBox.option('rect');
-    selectBox.option('triangle');
-    selectBox.changed(mySelectEvent);
-    selectBox.value('path');
-    panelInnerBox.child(selectBox);
-
     clearBtn = p.createButton('clear your canvas');
     clearBtn.id('clearBtn');
     clearBtn.class('btn btn-default');
@@ -118,12 +106,7 @@ let scketch = function(p){
 
     //myColor = [p.floor(p.random(255)),p.floor(p.random(255)),p.floor(p.random(255)),100];
     myColor = [0,0,0,sliderAlpha.value()];
-    myPattern = selectBox.value();
     myData = {
-      mx:myCurrentP.x,
-      my:myCurrentP.y,
-      pmx:myPrevP.x,
-      pmy:myPrevP.y,
       pathArr:myPathArr,
       path:myPath,
       clr:myColor,
@@ -175,23 +158,7 @@ let scketch = function(p){
         // if(clientsObj[key].drag){
         //
         // }
-        switch (clientsObj[key].pattern) {
-          case 'path':
-            drawPath(clientsObj[key]);
-          break;
-          case 'line':
-            drawLine(clientsObj[key]);
-          break;
-          case 'circle':
-            drawCircle(clientsObj[key]);
-          break;
-          case 'rect':
-            drawRectangle(clientsObj[key]);
-          break;
-          case 'triangle':
-            drawTriangle(clientsObj[key]);
-          break;
-        }
+        drawPath(clientsObj[key]);
       }
     }
 
@@ -253,10 +220,6 @@ let scketch = function(p){
 
       //データをセット
       myData = {
-        mx:myCurrentP.x,
-        my:myCurrentP.y,
-        pmx:myPrevP.x,
-        pmy:myPrevP.y,
         pathArr:myPathArr,
         path:myPath,
         clr:myColor,
@@ -341,79 +304,7 @@ let scketch = function(p){
 
   }
 
-  function drawTriangle(cltObj){
-    let radius = 100;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    radius *= cltObj.diff;
-    radius = p.constrain(radius,10,500);
-    p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
-    p.noFill();
-    p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle * 2);
-      let deg = -90;
-      let p1_x = 0;
-      let p1_y = -radius;
-      deg += 120;
-      let p2_x = (radius * p.cos(p.radians(deg)));
-      let p2_y = (radius * p.sin(p.radians(deg)));
-      deg += 120;
-      let p3_x = (radius * p.cos(p.radians(deg)));
-      let p3_y = (radius * p.sin(p.radians(deg)));
-      p.triangle(p1_x,p1_y,p2_x,p2_y,p3_x,p3_y);
-    p.pop();
-  }
 
-  function drawRectangle(cltObj){
-    let radius = 100;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    radius *= cltObj.diff;
-    radius = p.constrain(radius,10,500);
-    p.rectMode(p.RADIUS);
-    p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
-    p.noFill();
-    p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle * 0.05);
-      p.rect(0,0,radius,radius);
-    p.pop();
-  }
-
-  function drawCircle(cltObj){
-    let width = 300;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    width *= cltObj.diff;
-    width = p.constrain(width,20,500);
-    p.rectMode(p.RADIUS);
-    p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
-    p.noFill();
-    p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.ellipse(0,0,width,width);
-    p.pop();
-  }
-
-  function drawLine(cltObj){
-    let len = 300;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    len *= cltObj.diff;
-    len = p.constrain(len,40,300);
-    p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
-    p.noFill();
-    p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle * 0.1);
-      p.line(0,0,len,len);
-    p.pop();
-  }
-
-  function mySelectEvent() {
-    myPattern = selectBox.value();
-  }
 
   function clearCanvas(){
     myPathArr = [];
