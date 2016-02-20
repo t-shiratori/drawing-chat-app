@@ -16,6 +16,8 @@ let myPattern = 'path';
 let myBorderW;
 let myDragFlag = false;
 let myHistoryPoints = [];
+let myCurrentP = {x:-9999,y:-9999};
+let myPrevP = {x:-9999,y:-9999};
 
 //dom
 let panel;
@@ -115,7 +117,7 @@ let scketch = function(p){
     //myColor = [p.floor(p.random(255)),p.floor(p.random(255)),p.floor(p.random(255)),100];
     myColor = [0,0,0,sliderAlpha.value()];
     myPattern = selectBox.value();
-    myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+    myData = {mx:myCurrentP.x, my:myCurrentP.y, pmx:myPrevP.x, pmy:myPrevP.y, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
 
 
     /*--
@@ -126,6 +128,7 @@ let scketch = function(p){
     //サーバーからクライアントデータを受け取る
     socket.on('setClientData',function(clients){
       clientsObj = clients;
+      p.redraw();
     });
 
     //サーバーからチャット情報を受け取る
@@ -139,6 +142,7 @@ let scketch = function(p){
       socket.emit('disconnect');
     });
 
+    p.noLoop();
 
   }//end setup
 
@@ -177,6 +181,8 @@ let scketch = function(p){
       }
     }
 
+    p.noLoop();
+
   }// end draw
 
   p.mousePressed = function(e){
@@ -195,7 +201,17 @@ let scketch = function(p){
       p.cursor(p.CROSS);
 
       //前回と今回のマウス座標の差を利用する
-      let diff = p.sqrt(p.pow(p.mouseX - p.pmouseX,2) + p.pow(p.mouseY - p.pmouseY,2));
+      if(myPrevP.x == -9999){//初回時のみmyPrevPにmyCurrentPの値を入れてやる
+        myCurrentP.x = e.offsetX;
+        myCurrentP.y = e.offsetY;
+        myPrevP.x = myCurrentP.x;
+        myPrevP.y = myCurrentP.y;
+      }else{
+        myCurrentP.x = e.offsetX;
+        myCurrentP.y = e.offsetY;
+      }
+
+      let diff = p.sqrt(p.pow(myCurrentP.x - myPrevP.x,2) + p.pow(myCurrentP.y - myPrevP.y,2));
       diff *= 0.01;
       p.constrain(diff,1,180);
       myDiff = diff;
@@ -204,14 +220,17 @@ let scketch = function(p){
       myAngle += 1;
       myAngle = myAngle % 360;
 
-      let point = {x:p.mouseX,y:p.mouseY};
+      let point = {x:myCurrentP.x,y:myCurrentP.y};
       myHistoryPoints.push(point);
 
       //データをセット
-      myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+      myData = {mx:myCurrentP.x, my:myCurrentP.y, pmx:myPrevP.x, pmy:myPrevP.y, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
 
       //サーバーに送信
       socket.emit('getClientInfo',myData);
+
+      myPrevP.x = myCurrentP.x;
+      myPrevP.y = myCurrentP.y;
 
     };
 
@@ -222,15 +241,21 @@ let scketch = function(p){
     if(t == thisRenderer2dObj.canvas){
       myDragFlag = false;
       myHistoryPoints = [];
-      myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
+      myData = {mx:myCurrentP.x, my:myCurrentP.y, pmx:myPrevP.x, pmy:myPrevP.y, historyPoints:myHistoryPoints, clr:myColor, drag: myDragFlag, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
       socket.emit('getClientInfo',myData);
     }
-
   }
 
   p.windowResized = function() {
     p.resizeCanvas(p.windowWidth, p.windowHeight);
   }
+
+
+  /*----------------------
+
+  カスタムブラシ
+
+  -----------------------*/
 
   function drawPath(cltObj){
     let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
