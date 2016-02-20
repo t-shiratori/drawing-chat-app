@@ -198,6 +198,7 @@ let scketch = function(p){
       //データをセット
       myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, clr:myColor, drag: true, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
 
+      console.log(myData);
       //サーバーに送信
       socket.emit('getClientInfo',myData);
     };
