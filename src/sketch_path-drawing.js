@@ -88,7 +88,7 @@ let scketch = function(p){
     selectBox.option('rect');
     selectBox.option('triangle');
     selectBox.changed(mySelectEvent);
-    selectBox.value('triangle');
+    selectBox.value('path');
     panelInnerBox.child(selectBox);
 
     clearBtn = p.createButton('clear your canvas');
@@ -141,8 +141,6 @@ let scketch = function(p){
     ------------------------------------*/
     socket = io();
 
-    //接続したらidゲット
-    //特に使ってないけど一応
     socket.on('init', function(id){
       myID = id;
     });
@@ -177,29 +175,29 @@ let scketch = function(p){
     //p.rect(0,0,p.windowWidth, p.windowHeight);
 
 
-    //p.clear();
+    p.clear();
     for(let key in clientsObj) {
       if(clientsObj.hasOwnProperty(key)) {
-        if(clientsObj[key].drag){
-          switch (clientsObj[key].pattern) {
-            case 'path':
-              drawPath(clientsObj[key]);
-            break;
-            case 'line':
-              drawLine(clientsObj[key]);
-            break;
-            case 'circle':
-              drawCircle(clientsObj[key]);
-            break;
-            case 'rect':
-              drawRectangle(clientsObj[key]);
-            break;
-            case 'triangle':
-              drawTriangle(clientsObj[key]);
-            break;
-          }
+        // if(clientsObj[key].drag){
+        //
+        // }
+        switch (clientsObj[key].pattern) {
+          case 'path':
+            drawPath(clientsObj[key]);
+          break;
+          case 'line':
+            drawLine(clientsObj[key]);
+          break;
+          case 'circle':
+            drawCircle(clientsObj[key]);
+          break;
+          case 'rect':
+            drawRectangle(clientsObj[key]);
+          break;
+          case 'triangle':
+            drawTriangle(clientsObj[key]);
+          break;
         }
-
       }
     }
 
@@ -290,13 +288,12 @@ let scketch = function(p){
     let t = e.srcElement || e.target;//for ie
     if(t == thisRenderer2dObj.canvas){
       myDragFlag = false;
-      myData.drag = myDragFlag;
       myPrevP.x = -9999;
       myPrevP.y = -9999;
+      myData.drag = myDragFlag;
       //今回のpathをpathのストックに追加
       myPathArr.push(myPath);
-      //サーバーに送信
-      socket.emit('getClientInfo',myData);
+
     }
   }
 
@@ -322,6 +319,7 @@ let scketch = function(p){
       let c = p.color(cltObj.path.clr[0],cltObj.path.clr[1],cltObj.path.clr[2],cltObj.path.clr[3]);
       p.stroke(c);
       p.strokeWeight(cltObj.path.bdW);
+
       p.beginShape();
       for(let i = 0; i<cltObj.path.points.length; i++){
         let h = cltObj.path.points[i];
@@ -422,10 +420,6 @@ let scketch = function(p){
 
   function mySelectEvent() {
     myPattern = selectBox.value();
-    //ブラシパターンが変更されたらpathの座標ヒストリーを初期化
-    myHistoryPoints = [];
-    myPathArr = [];
-    myData.path = myPathArr;
   }
 
   function clearCanvas(){

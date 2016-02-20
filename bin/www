@@ -43,6 +43,8 @@ io.on('connection', function (socket) {
   //console.log(io.sockets.adapter.rooms[roomName]);
   //console.log(sockets.adapter.rooms[roomName].length);
 
+  io.to(socket.id).emit('init',socket.id);
+
   io.to(roomName).emit('chatInfoUpdate',io.sockets.adapter.rooms[roomName]);
 
   socket.on('getClientInfo', function(clientData){
