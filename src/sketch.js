@@ -232,7 +232,7 @@ let scketch = function(p){
   }
 
   function drawTriangle(cltObj){
-    let radius = 100;
+    let radius = 200;
     let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
     radius *= cltObj.diff;
     radius = p.constrain(radius,20,200);
