@@ -52,7 +52,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('disconnect', function (socket) {
-    clients = {};//切断したclientが発生したらclientsを初期化、不要なデータが残ってしまうので。
+    clients = {};//切断したclientが発生したらclientsオブジェクトを初期化、不要なデータが残ってしまうので。
     io.to(roomName).emit('chatInfoUpdate',io.sockets.adapter.rooms[roomName]);
     console.log('disconnect socketid: ',socket);
     console.log(io.sockets.adapter.rooms[roomName]);

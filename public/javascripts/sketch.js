@@ -121,18 +121,18 @@ var scketch = function scketch(p) {
     ------------------------------------*/
     socket = io();
 
-    //
+    //サーバーからクライアントデータを受け取る
     socket.on('setClientData', function (clients) {
       clientsObj = clients;
     });
 
-    //
+    //サーバーからチャット情報を受け取る
     socket.on('chatInfoUpdate', function (chatData) {
       var chatNum = document.getElementById('chatNum');
       chatNum.innerHTML = chatData.length;
     });
 
-    //
+    //ウィンドウを閉じたらサーバーに通信切断を通知する
     socket.on('disconnect', function () {
       socket.emit('disconnect');
     });
@@ -181,7 +181,7 @@ var scketch = function scketch(p) {
 
       //前回と今回のマウス座標の差を利用する
       var diff = p.sqrt(p.pow(p.mouseX - p.pmouseX, 2) + p.pow(p.mouseY - p.pmouseY, 2));
-      diff *= 0.02;
+      diff *= 0.01;
       p.constrain(diff, 1, 180);
       myDiff = diff;
 
@@ -234,7 +234,7 @@ var scketch = function scketch(p) {
     p.noFill();
     p.push();
     p.translate(cltObj.mx, cltObj.my);
-    p.rotate(cltObj.angle*2);
+    p.rotate(cltObj.angle * 2);
     var deg = -90;
     var p1_x = 0;
     var p1_y = -radius;

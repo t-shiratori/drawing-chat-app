@@ -106,7 +106,7 @@ let scketch = function(p){
     ttlSliderBorderW.id('ttlSliderBorderW');
     panelInnerBox.child(ttlSliderBorderW);
 
-    sliderBorderW = p.createSlider(1,40,10);
+    sliderBorderW = p.createSlider(1,40,1);
     sliderBorderW.id('sliderBorderW');
     panelInnerBox.child(sliderBorderW);
 
@@ -121,18 +121,18 @@ let scketch = function(p){
     ------------------------------------*/
     socket = io();
 
-    //
+    //サーバーからクライアントデータを受け取る
     socket.on('setClientData',function(clients){
       clientsObj = clients;
     });
 
-    //
+    //サーバーからチャット情報を受け取る
     socket.on('chatInfoUpdate',function(chatData){
       let chatNum = document.getElementById('chatNum');
       chatNum.innerHTML = chatData.length;
     });
 
-    //
+    //ウィンドウを閉じたらサーバーに通信切断を通知する
     socket.on('disconnect',function(){
       socket.emit('disconnect');
     });
@@ -185,13 +185,13 @@ let scketch = function(p){
 
       //前回と今回のマウス座標の差を利用する
       let diff = p.sqrt(p.pow(p.mouseX - p.pmouseX,2) + p.pow(p.mouseY - p.pmouseY,2));
-      diff *= 0.005;
-      p.constrain(diff,1,45);
+      diff *= 0.01;
+      p.constrain(diff,1,180);
+      myDiff = diff;
 
       //回転の角度更新
-      myAngle += diff;
+      myAngle += 1;
       myAngle = myAngle % 360;
-      myDiff = diff;
 
       //データをセット
       myData = {mx:p.mouseX, my:p.mouseY, pmx:p.pmouseX, pmy:p.pmouseY, clr:myColor, drag: true, angle: myAngle ,diff: myDiff, pattern: myPattern, bdW: myBorderW};
@@ -239,7 +239,7 @@ let scketch = function(p){
     p.noFill();
     p.push();
       p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle);
+      p.rotate(cltObj.angle * 2);
       let deg = -90;
       let p1_x = 0;
       let p1_y = -radius;
@@ -264,7 +264,7 @@ let scketch = function(p){
     p.noFill();
     p.push();
       p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle);
+      p.rotate(cltObj.angle * 0.05);
       p.rect(0,0,radius,radius);
     p.pop();
   }
@@ -294,7 +294,7 @@ let scketch = function(p){
     p.noFill();
     p.push();
       p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle);
+      p.rotate(cltObj.angle * 0.1);
       p.line(0,0,len,len);
     p.pop();
   }
@@ -339,7 +339,7 @@ let colorPicker__selectSatBriSketch = function(p){
     colorPicker__selectSatBri = p.createDiv('');
     colorPicker__selectSatBri.id('colorPicker__selectSatBri');
     panelInnerBox.child(colorPicker__selectSatBri);
-    
+
     //canvas作成
     thisRenderer2dObj = p.createCanvas(cvsW, cvsH);
     thisRenderer2dObj.mousePressed(changeColor);//こうするとthisRenderer2dObjがクリックされた時だけ呼び出されるのでmainCanvasに影響しない。
