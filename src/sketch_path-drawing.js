@@ -9,7 +9,6 @@ let colorPickerSelectSatBriSketch_p5;
 //scketch
 let clientsObj;
 let myData;
-let myID = 0;
 let myColor;
 let myAngle = 0;
 let myDiff = 0;
@@ -121,7 +120,6 @@ let scketch = function(p){
     myColor = [0,0,0,sliderAlpha.value()];
     myPattern = selectBox.value();
     myData = {
-      id: myID,
       mx:myCurrentP.x,
       my:myCurrentP.y,
       pmx:myPrevP.x,
@@ -140,10 +138,6 @@ let scketch = function(p){
       socket io
     ------------------------------------*/
     socket = io();
-
-    socket.on('init', function(id){
-      myID = id;
-    });
 
     //サーバーからクライアントデータを受け取る
     socket.on('setClientData',function(clients){
@@ -259,7 +253,6 @@ let scketch = function(p){
 
       //データをセット
       myData = {
-        id: myID,
         mx:myCurrentP.x,
         my:myCurrentP.y,
         pmx:myPrevP.x,
