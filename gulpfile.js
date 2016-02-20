@@ -22,17 +22,17 @@ gulp.task('browserify',function (){
     extensions: ['.js']
   })
   .transform(babelify,{presets: ['es2015']},{ debug: true })
-		.bundle()
-    .pipe(gulpPlugins.plumber())
-		.on('error', function (err) {
-			console.log('Error : ' + err.message);
-			this.emit('end');
-		})
-    .pipe(source(output_file_name_browserify))
-    .pipe(buffer()) //uglify()するときにこれをやらないとエラーになる
-    .pipe(gulpPlugins.uglify())
-  	.pipe(gulp.dest(dest_url_browserify))
-    .pipe(browserSync.stream());
+	.bundle()
+  .pipe(gulpPlugins.plumber())
+	.on('error', function (err) {
+		console.log('Error : ' + err.message);
+		this.emit('end');
+	})
+  .pipe(source(output_file_name_browserify))//ここでvinylに変換される
+  .pipe(buffer()) //uglify()するときにこれをやらないとエラーになる
+  .pipe(gulpPlugins.uglify())
+	.pipe(gulp.dest(dest_url_browserify))
+  .pipe(browserSync.stream());//タスクの中で変更が発生したファイルのみを読み込み、画面に再描画する
 });
 
 //sass

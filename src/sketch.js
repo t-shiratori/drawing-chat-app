@@ -145,6 +145,8 @@ let scketch = function(p){
     //p.clear();
     //p.background(0);
     //p.background(255);
+    //p.fill(255,255,255,50);
+    //p.rect(0,0,p.windowWidth, p.windowHeight);
 
     myColor[3] = sliderAlpha.value();
     myBorderW = sliderBorderW.value();
