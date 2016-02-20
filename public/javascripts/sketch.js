@@ -107,7 +107,7 @@ var scketch = function scketch(p) {
     ttlSliderBorderW.id('ttlSliderBorderW');
     panelInnerBox.child(ttlSliderBorderW);
 
-    sliderBorderW = p.createSlider(1, 40, 10);
+    sliderBorderW = p.createSlider(1, 40, 1);
     sliderBorderW.id('sliderBorderW');
     panelInnerBox.child(sliderBorderW);
 
@@ -181,13 +181,13 @@ var scketch = function scketch(p) {
 
       //前回と今回のマウス座標の差を利用する
       var diff = p.sqrt(p.pow(p.mouseX - p.pmouseX, 2) + p.pow(p.mouseY - p.pmouseY, 2));
-      diff *= 0.005;
-      p.constrain(diff, 1, 45);
+      diff *= 0.02;
+      p.constrain(diff, 1, 180);
+      myDiff = diff;
 
       //回転の角度更新
-      myAngle += diff;
+      myAngle += 1;
       myAngle = myAngle % 360;
-      myDiff = diff;
 
       //データをセット
       myData = { mx: p.mouseX, my: p.mouseY, pmx: p.pmouseX, pmy: p.pmouseY, clr: myColor, drag: true, angle: myAngle, diff: myDiff, pattern: myPattern, bdW: myBorderW };
@@ -234,7 +234,7 @@ var scketch = function scketch(p) {
     p.noFill();
     p.push();
     p.translate(cltObj.mx, cltObj.my);
-    p.rotate(cltObj.angle);
+    p.rotate(cltObj.angle*2);
     var deg = -90;
     var p1_x = 0;
     var p1_y = -radius;
@@ -259,7 +259,7 @@ var scketch = function scketch(p) {
     p.noFill();
     p.push();
     p.translate(cltObj.mx, cltObj.my);
-    p.rotate(cltObj.angle);
+    p.rotate(cltObj.angle * 0.05);
     p.rect(0, 0, radius, radius);
     p.pop();
   }
@@ -289,7 +289,7 @@ var scketch = function scketch(p) {
     p.noFill();
     p.push();
     p.translate(cltObj.mx, cltObj.my);
-    p.rotate(cltObj.angle);
+    p.rotate(cltObj.angle * 0.1);
     p.line(0, 0, len, len);
     p.pop();
   }
