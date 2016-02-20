@@ -2,6 +2,7 @@ var gulp = require('gulp'),
     gulpPlugins = require('gulp-load-plugins')(),
     browserify = require('browserify'),
     babelify = require('babelify'),
+    buffer = require('vinyl-buffer'),
     source = require('vinyl-source-stream'),
     browserSync = require('browser-sync');
 
@@ -28,6 +29,8 @@ gulp.task('browserify',function (){
 			this.emit('end');
 		})
     .pipe(source(output_file_name_browserify))
+    .pipe(buffer()) //uglify()するときにこれをやらないとエラーになる
+    .pipe(gulpPlugins.uglify())
   	.pipe(gulp.dest(dest_url_browserify))
     .pipe(browserSync.stream());
 });
