@@ -84,7 +84,7 @@ let scketch = function(p){
     selectBox.value('triangle');
     panelInnerBox.child(selectBox);
 
-    clearBtn = p.createButton('clear canvas');
+    clearBtn = p.createButton('clear your canvas');
     clearBtn.id('clearBtn');
     clearBtn.class('btn btn-default');
     clearBtn.mouseClicked(clearCanvas);
@@ -232,10 +232,10 @@ let scketch = function(p){
   }
 
   function drawTriangle(cltObj){
-    let radius = 200;
+    let radius = 100;
     let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
     radius *= cltObj.diff;
-    radius = p.constrain(radius,20,200);
+    radius = p.constrain(radius,10,500);
     p.stroke(c);
     p.strokeWeight(cltObj.bdW);
     p.noFill();
@@ -259,7 +259,7 @@ let scketch = function(p){
     let radius = 100;
     let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
     radius *= cltObj.diff;
-    radius = p.constrain(radius,15,200);
+    radius = p.constrain(radius,10,500);
     p.rectMode(p.RADIUS);
     p.stroke(c);
     p.strokeWeight(cltObj.bdW);
@@ -275,7 +275,7 @@ let scketch = function(p){
     let width = 300;
     let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
     width *= cltObj.diff;
-    width = p.constrain(width,20,200);
+    width = p.constrain(width,20,500);
     p.rectMode(p.RADIUS);
     p.stroke(c);
     p.strokeWeight(cltObj.bdW);

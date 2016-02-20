@@ -14,7 +14,7 @@ div, p {
   position: fixed;
   top: 0;
   left: 0;
-  width: 150px;
+  width: 170px;
   height: 100%;
   background: #666666; }
 
@@ -32,7 +32,7 @@ div, p {
   #panelInnerBox #chatNum {
     margin-bottom: 20px; }
   #panelInnerBox #clearBtn {
-    width: 8em; }
+    width: 10em; }
   #panelInnerBox #sliderAlpha {
     width: 100px; }
   #panelInnerBox #sliderBorderW {
