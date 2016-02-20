@@ -19,7 +19,6 @@ let myHistoryPoints = [];
 let myPathArr = [];
 let myPath = {};
 let myCurrentP = {x:-9999,y:-9999};
-let myPrevP = {x:-9999,y:-9999};
 
 //dom
 let panel;
@@ -104,17 +103,12 @@ let scketch = function(p){
     sliderBorderW.id('sliderBorderW');
     panelInnerBox.child(sliderBorderW);
 
-    //myColor = [p.floor(p.random(255)),p.floor(p.random(255)),p.floor(p.random(255)),100];
     myColor = [0,0,0,sliderAlpha.value()];
+
     myData = {
       pathArr:myPathArr,
       path:myPath,
-      clr:myColor,
-      drag: myDragFlag,
-      angle: myAngle ,
-      diff: myDiff,
-      pattern: myPattern,
-      bdW: myBorderW
+      drag: myDragFlag
     };
 
     /*--
@@ -182,25 +176,8 @@ let scketch = function(p){
 
       p.cursor(p.CROSS);
 
-      //前回と今回のマウス座標の差を利用する
-      if(myPrevP.x == -9999){//ドラッグ開始時のみmyPrevPにmyCurrentPの値を入れてやる
-        myCurrentP.x = e.offsetX;
-        myCurrentP.y = e.offsetY;
-        myPrevP.x = myCurrentP.x;
-        myPrevP.y = myCurrentP.y;
-      }else{
-        myCurrentP.x = e.offsetX;
-        myCurrentP.y = e.offsetY;
-      }
-
-      let diff = p.sqrt(p.pow(myCurrentP.x - myPrevP.x,2) + p.pow(myCurrentP.y - myPrevP.y,2));
-      diff *= 0.01;
-      p.constrain(diff,1,180);
-      myDiff = diff;
-
-      //回転の角度更新
-      myAngle += 1;
-      myAngle = myAngle % 360;
+      myCurrentP.x = e.offsetX;
+      myCurrentP.y = e.offsetY;
 
       //座標ヒストリー
       let point = {x:myCurrentP.x,y:myCurrentP.y};
@@ -216,25 +193,17 @@ let scketch = function(p){
       let tempCol = [myColor[0],myColor[1],myColor[2],myColor[3]];
 
       //今回のドラッグのパスデータ
-      myPath = {clr:tempCol, bdW: sliderBorderW.value(), points: myHistoryPoints};
+      myPath = {clr:tempCol, bdW: myBorderW, points: myHistoryPoints};
 
       //データをセット
       myData = {
         pathArr:myPathArr,
         path:myPath,
-        clr:myColor,
-        drag: myDragFlag,
-        angle: myAngle ,
-        diff: myDiff,
-        pattern: myPattern,
-        bdW: myBorderW
+        drag: myDragFlag
       };
 
       //サーバーに送信
       socket.emit('getClientInfo',myData);
-
-      myPrevP.x = myCurrentP.x;
-      myPrevP.y = myCurrentP.y;
 
     };
 
@@ -244,8 +213,6 @@ let scketch = function(p){
     let t = e.srcElement || e.target;//for ie
     if(t == thisRenderer2dObj.canvas){
       myDragFlag = false;
-      myPrevP.x = -9999;
-      myPrevP.y = -9999;
       myData.drag = myDragFlag;
       //今回のpathをpathのストックに追加
       myPathArr.push(myPath);
@@ -267,15 +234,11 @@ let scketch = function(p){
     p.strokeCap(p.ROUND);
     //p.strokeCap(p.SQUARE);
     //p.strokeCap(p.PROJECT);
-
     p.noFill();
     p.push();
-      //p.translate(cltObj.mx,cltObj.my);
-      //p.line(cltObj.mx,cltObj.my,cltObj.pmx,cltObj.pmy);
       let c = p.color(cltObj.path.clr[0],cltObj.path.clr[1],cltObj.path.clr[2],cltObj.path.clr[3]);
       p.stroke(c);
       p.strokeWeight(cltObj.path.bdW);
-
       p.beginShape();
       for(let i = 0; i<cltObj.path.points.length; i++){
         let h = cltObj.path.points[i];
@@ -291,7 +254,6 @@ let scketch = function(p){
           let c = p.color(thisPath.clr[0],thisPath.clr[1],thisPath.clr[2],thisPath.clr[3]);
           p.stroke(c);
           p.strokeWeight(thisPath.bdW);
-
           p.beginShape();
           for(let i = 0; i<thisPath.points.length; i++){
             let h = thisPath.points[i];
@@ -303,7 +265,6 @@ let scketch = function(p){
     }
 
   }
-
 
 
   function clearCanvas(){
