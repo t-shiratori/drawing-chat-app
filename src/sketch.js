@@ -404,7 +404,7 @@ let scketch = function(p){
     let len = 300;
     let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
     len *= obj.diff;
-    len = p.constrain(len,40,300);
+    len = p.constrain(len,40,500);
     p.stroke(c);
     p.strokeWeight(obj.bdW);
     p.noFill();
