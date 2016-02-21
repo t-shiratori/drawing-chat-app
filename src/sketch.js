@@ -346,10 +346,10 @@ let scketch = function(p){
   }
 
   function drawTriangle(obj){
-    let radius = 200;
+    let radius = 250;
     let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
     radius *= obj.diff;
-    radius = p.constrain(radius,10,500);
+    radius = p.constrain(radius,10,500);//外心から頂点までの長さ
     p.stroke(c);
     p.strokeWeight(obj.bdW);
     p.noFill();
@@ -386,7 +386,7 @@ let scketch = function(p){
   }
 
   function drawCircle(obj){
-    let width = 300;
+    let width = 350;
     let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
     width *= obj.diff;
     width = p.constrain(width,20,500);
