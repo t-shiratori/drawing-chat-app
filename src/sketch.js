@@ -7,8 +7,8 @@ let socket;
 let colorPickerSelectSatBriSketch_p5;
 
 //scketch
-let users = {};//チャットルームメンバーごとのデータ管理テーブル
-let lines = [];//描画する全てのストローク保持用
+let users = {};//チャットルームメンバーごとのデータ管理テーブル（各メンバーごとにストロークデータをストック）
+let lines = [];//pathドローイング用、描画する全てのストロークを保持
 let myData;
 let myID;
 let myColor;
@@ -147,7 +147,8 @@ let scketch = function(p){
     });
 
     //サーバーから、更新されたユーザーデータを受け取る
-    //新規ストロークの追加
+    //対象ユーザーのストロークデータを初期化してlinesに新規ストロークを追加
+    //linesに全部ストロークデータを保持することで過去のストロークも描画できる
     socket.on('addToLines',function(id){
       users[id] = [];
       lines.push(users[id]);
@@ -168,7 +169,7 @@ let scketch = function(p){
 
     //
     socket.on('resetMyData',function(id){
-      users[id] = {};
+      users[id] = [];
       lines = [];
     });
 
@@ -192,6 +193,7 @@ let scketch = function(p){
 
     for(let key in users) {
       if(users.hasOwnProperty(key)) {
+        //ユーザーの最新のストロークデータを参照してドローイングの場合分けする
         let num = users[key].length - 1;
         if(!users[key][num])return;
         if(users[key][num].drag){
@@ -299,7 +301,7 @@ let scketch = function(p){
   p.mouseReleased = function(e){
     let t = e.srcElement || e.target;//for ie
     if(t == thisRenderer2dObj.canvas){
-      myDragFlag = true;
+      myDragFlag = false;
       myData.drag = myDragFlag;
       myPrevP.x = -9999;
       myPrevP.y = -9999;
