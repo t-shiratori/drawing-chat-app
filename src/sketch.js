@@ -7,8 +7,10 @@ let socket;
 let colorPickerSelectSatBriSketch_p5;
 
 //scketch
-let clientsObj;
+let users = {};//チャットルームメンバーごとのデータ管理テーブル
+let lines = [];//描画する全てのストローク保持用
 let myData;
+let myID;
 let myColor;
 let myAngle = 0;
 let myDiff = 0;
@@ -87,7 +89,7 @@ let scketch = function(p){
     selectBox.option('rect');
     selectBox.option('triangle');
     selectBox.changed(mySelectEvent);
-    selectBox.value('triangle');
+    selectBox.value('path');
     panelInnerBox.child(selectBox);
 
     clearBtn = p.createButton('clear your canvas');
@@ -139,9 +141,22 @@ let scketch = function(p){
     ------------------------------------*/
     socket = io();
 
-    //サーバーからクライアントデータを受け取る
-    socket.on('setClientData',function(clients){
-      clientsObj = clients;
+    //サーバーから自分のidを受け取る
+    socket.on('setYourId',function(yourId){
+      myID = yourId;
+    });
+
+    //サーバーから、更新されたユーザーデータを受け取る
+    //新規ストロークの追加
+    socket.on('addToLines',function(id){
+      users[id] = [];
+      lines.push(users[id]);
+    });
+
+    //サーバーからユーザーデータを受け取る
+    //ユーザーごとの更新データを追加する
+    socket.on('getUserData',function(userData){
+      users[userData.id].push(userData);
       p.redraw();
     });
 
@@ -150,6 +165,18 @@ let scketch = function(p){
       let chatNum = document.getElementById('chatNum');
       chatNum.innerHTML = chatData.length;
     });
+
+    //
+    socket.on('resetMyData',function(id){
+      users[id] = {};
+      lines = [];
+    });
+
+    //全員のキャンバスを初期化
+    // socket.on('clearCanvas',function(id){
+    //   users[id] = {};
+    // });
+
 
     //ウィンドウを閉じたらサーバーに通信切断を通知する
     socket.on('disconnect',function(){
@@ -162,32 +189,27 @@ let scketch = function(p){
 
 
   p.draw = function(){
-    //p.clear();
-    //p.background(0);
-    //p.background(255);
-    //p.fill(255,255,255,50);
-    //p.rect(0,0,p.windowWidth, p.windowHeight);
 
-
-    //p.clear();
-    for(let key in clientsObj) {
-      if(clientsObj.hasOwnProperty(key)) {
-        if(clientsObj[key].drag){
-          switch (clientsObj[key].pattern) {
+    for(let key in users) {
+      if(users.hasOwnProperty(key)) {
+        let num = users[key].length - 1;
+        if(!users[key][num])return;
+        if(users[key][num].drag){
+          switch (users[key][num].pattern) {
             case 'path':
-              drawPath(clientsObj[key]);
+              drawPath();
             break;
             case 'line':
-              drawLine(clientsObj[key]);
+              drawLine(users[key][num]);
             break;
             case 'circle':
-              drawCircle(clientsObj[key]);
+              drawCircle(users[key][num]);
             break;
             case 'rect':
-              drawRectangle(clientsObj[key]);
+              drawRectangle(users[key][num]);
             break;
             case 'triangle':
-              drawTriangle(clientsObj[key]);
+              drawTriangle(users[key][num]);
             break;
           }
         }
@@ -203,7 +225,8 @@ let scketch = function(p){
     let t = e.srcElement || e.target;//for ie
     if(t == thisRenderer2dObj.canvas){
       myDragFlag = true;
-      myHistoryPoints = [];
+      myData.drag = myDragFlag;
+      socket.emit('pushUserStroke');
     }
   }
 
@@ -238,7 +261,6 @@ let scketch = function(p){
 
       //座標ヒストリー保存
       let point = {x:myCurrentP.x,y:myCurrentP.y};
-      myHistoryPoints.push(point);
 
       //アルファ値
       myColor[3] = sliderAlpha.value();
@@ -249,17 +271,12 @@ let scketch = function(p){
       //今回のストロークの色
       let tempCol = [myColor[0],myColor[1],myColor[2],myColor[3]];
 
-      //今回のドラッグのパスデータ
-      myPath = {clr:tempCol, bdW: sliderBorderW.value(), points: myHistoryPoints};
-
       //データをセット
       myData = {
         mx:myCurrentP.x,
         my:myCurrentP.y,
         pmx:myPrevP.x,
         pmy:myPrevP.y,
-        pathArr:myPathArr,
-        path:myPath,
         clr:myColor,
         drag: myDragFlag,
         angle: myAngle ,
@@ -282,12 +299,10 @@ let scketch = function(p){
   p.mouseReleased = function(e){
     let t = e.srcElement || e.target;//for ie
     if(t == thisRenderer2dObj.canvas){
-      myDragFlag = false;
+      myDragFlag = true;
       myData.drag = myDragFlag;
       myPrevP.x = -9999;
       myPrevP.y = -9999;
-      //今回のpathをpathのストックに追加
-      myPathArr.push(myPath);
       //サーバーに送信
       socket.emit('getClientInfo',myData);
     }
@@ -303,57 +318,41 @@ let scketch = function(p){
   カスタムブラシ
 
   -----------------------*/
-  function drawPath(cltObj){
+  function drawPath(){
     p.strokeCap(p.ROUND);
     //p.strokeCap(p.SQUARE);
     //p.strokeCap(p.PROJECT);
-
     p.noFill();
-    p.push();
-      //p.translate(cltObj.mx,cltObj.my);
-      //p.line(cltObj.mx,cltObj.my,cltObj.pmx,cltObj.pmy);
-      let c = p.color(cltObj.path.clr[0],cltObj.path.clr[1],cltObj.path.clr[2],cltObj.path.clr[3]);
-      p.stroke(c);
-      p.strokeWeight(cltObj.path.bdW);
-      p.beginShape();
-      for(let i = 0; i<cltObj.path.points.length; i++){
-        let h = cltObj.path.points[i];
-        p.vertex(h.x,h.y);
-      }
-      p.endShape();
-    p.pop();
-
-    if(cltObj.pathArr.length > 0){
-      for(let i = 0; i<cltObj.pathArr.length; i++){
-        let thisPath = cltObj.pathArr[i];
-        p.push();
-          let c = p.color(thisPath.clr[0],thisPath.clr[1],thisPath.clr[2],thisPath.clr[3]);
-          p.stroke(c);
-          p.strokeWeight(thisPath.bdW);
-
-          p.beginShape();
-          for(let i = 0; i<thisPath.points.length; i++){
-            let h = thisPath.points[i];
-            p.vertex(h.x,h.y);
+    for(let i=0; i<lines.length; i++){
+      let line = lines[i];
+      p.push();
+        p.noFill();
+        p.beginShape();
+          for(let j = 0; j<line.length; j++){
+            if(line[j].pattern == 'path') {
+              let c = p.color(line[j].clr[0],line[j].clr[1],line[j].clr[2],line[j].clr[3]);
+              p.stroke(c);
+              p.strokeWeight(line[j].bdW);
+              p.vertex(line[j].mx,line[j].my);
+            };
           }
-          p.endShape();
-        p.pop();
-      }
+        p.endShape();
+      p.pop();
     }
 
   }
 
-  function drawTriangle(cltObj){
+  function drawTriangle(obj){
     let radius = 100;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    radius *= cltObj.diff;
+    let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
+    radius *= obj.diff;
     radius = p.constrain(radius,10,500);
     p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
+    p.strokeWeight(obj.bdW);
     p.noFill();
     p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle * 2);
+      p.translate(obj.mx,obj.my);
+      p.rotate(obj.angle * 2);
       let deg = -90;
       let p1_x = 0;
       let p1_y = -radius;
@@ -367,63 +366,63 @@ let scketch = function(p){
     p.pop();
   }
 
-  function drawRectangle(cltObj){
+  function drawRectangle(obj){
     let radius = 100;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    radius *= cltObj.diff;
+    let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
+    radius *= obj.diff;
     radius = p.constrain(radius,10,500);
     p.rectMode(p.RADIUS);
     p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
+    p.strokeWeight(obj.bdW);
     p.noFill();
     p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle * 0.05);
+      p.translate(obj.mx,obj.my);
+      p.rotate(obj.angle * 0.05);
       p.rect(0,0,radius,radius);
     p.pop();
   }
 
-  function drawCircle(cltObj){
+  function drawCircle(obj){
     let width = 300;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    width *= cltObj.diff;
+    let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
+    width *= obj.diff;
     width = p.constrain(width,20,500);
     p.rectMode(p.RADIUS);
     p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
+    p.strokeWeight(obj.bdW);
     p.noFill();
     p.push();
-      p.translate(cltObj.mx,cltObj.my);
+      p.translate(obj.mx,obj.my);
       p.ellipse(0,0,width,width);
     p.pop();
   }
 
-  function drawLine(cltObj){
+  function drawLine(obj){
     let len = 300;
-    let c = p.color(cltObj.clr[0],cltObj.clr[1],cltObj.clr[2],cltObj.clr[3]);
-    len *= cltObj.diff;
+    let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
+    len *= obj.diff;
     len = p.constrain(len,40,300);
     p.stroke(c);
-    p.strokeWeight(cltObj.bdW);
+    p.strokeWeight(obj.bdW);
     p.noFill();
     p.push();
-      p.translate(cltObj.mx,cltObj.my);
-      p.rotate(cltObj.angle * 0.1);
+      p.translate(obj.mx,obj.my);
+      p.rotate(obj.angle * 0.1);
       p.line(0,0,len,len);
     p.pop();
   }
 
   function mySelectEvent() {
     myPattern = selectBox.value();
-    //ブラシパターンが変更されたらpathの座標ヒストリーを初期化
-    myHistoryPoints = [];
-    myPathArr = [];
-    myData.path = myPathArr;
+    //ブラシパターンが変更したら自分のpathのデータを初期化
+    socket.emit('resetMyData');
   }
 
   function clearCanvas(){
-    myPathArr = [];
+    users = {};//自分のとこだけ全部のユーザーのデータを初期化
     p.clear();
+    //socket.emit('clearCanvas');
+    socket.emit('resetMyData');
   }
 
 }
@@ -577,10 +576,13 @@ let colorPicker__selectHueSkech = function(p){
     let hue = getHue(r,g,b);
     hue = p.map(hue,0,360,0,100);
 
-    //
+    //色相を更新
     pickerHue = hue;
+
+    //彩度明度ピッカーを再描画
     colorPickerSelectSatBriSketch_p5.draw();
 
+    //ドローイングの色を更新
     myColor[0] = r;
     myColor[1] = g;
     myColor[2] = b;
