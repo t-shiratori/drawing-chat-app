@@ -89,7 +89,7 @@ let scketch = function(p){
     selectBox.option('rect');
     selectBox.option('triangle');
     selectBox.changed(mySelectEvent);
-    selectBox.value('path');
+    selectBox.value('triangle');
     panelInnerBox.child(selectBox);
 
     clearBtn = p.createButton('clear your canvas');
@@ -346,7 +346,7 @@ let scketch = function(p){
   }
 
   function drawTriangle(obj){
-    let radius = 100;
+    let radius = 200;
     let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
     radius *= obj.diff;
     radius = p.constrain(radius,10,500);
@@ -370,7 +370,7 @@ let scketch = function(p){
   }
 
   function drawRectangle(obj){
-    let radius = 100;
+    let radius = 200;
     let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
     radius *= obj.diff;
     radius = p.constrain(radius,10,500);
