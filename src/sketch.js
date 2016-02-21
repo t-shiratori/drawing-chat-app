@@ -148,9 +148,10 @@ let scketch = function(p){
 
     //サーバーから、更新されたユーザーデータを受け取る
     //対象ユーザーのストロークデータを初期化してlinesに新規ストロークを追加
-    //linesに全部ストロークデータを保持することで過去のストロークも描画できる
+    //linesに全部ストロークデータを保持することで他のユーザーのストロークも描画できるようになる
     socket.on('addToLines',function(id){
       users[id] = [];
+      lines = [];
       lines.push(users[id]);
     });
 
