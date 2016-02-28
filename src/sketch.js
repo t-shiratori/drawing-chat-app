@@ -8,7 +8,7 @@ let colorPickerSelectSatBriSketch_p5;
 
 //scketch
 let users = {};//チャットルームメンバーごとのデータ管理テーブル（各メンバーごとにストロークデータをストック）
-let lines = [];//pathドローイング用、描画する全てのストロークを保持
+let strokes = [];//pathドローイング用、描画する全てのストロークを保持
 let myData;
 let myID;
 let myColor;
@@ -147,12 +147,12 @@ let scketch = function(p){
     });
 
     //サーバーから、更新されたユーザーデータを受け取る
-    //対象ユーザーのストロークデータを初期化してlinesに新規ストロークを追加
-    //linesに全部ストロークデータを保持することで他のユーザーのストロークも描画できるようになる
-    socket.on('addToLines',function(id){
-      users[id] = [];
-      lines = [];
-      lines.push(users[id]);
+    //対象ユーザーのストロークデータを初期化してstrokesに新規ストロークを追加
+    //strokesに全部ストロークデータを保持することで他のユーザーのストロークも描画できるようになる
+    socket.on('addToStrokes',function(id){
+      users[id] = [];//空にしているのではなく新しい配列オブジェクトを作成している。なので参照されるのは最新の配列オブジェクトだけ。
+      strokes = [];
+      strokes.push(users[id]);
     });
 
     //サーバーからユーザーデータを受け取る
@@ -171,7 +171,7 @@ let scketch = function(p){
     //
     socket.on('resetMyData',function(id){
       users[id] = [];
-      lines = [];
+      strokes = [];
     });
 
     //全員のキャンバスを初期化
@@ -242,7 +242,7 @@ let scketch = function(p){
       p.cursor(p.CROSS);
 
       //前回と今回のマウス座標
-      if(myPrevP.x == -9999){//ドラッグ開始時のみmyPrevPにmyCurrentPの値を入れてやる
+      if(myPrevP.x == -9999){//ドラッグ開始時のみmyPrevPにmyCurrentPの値を入れて初期セットする
         myCurrentP.x = e.offsetX;
         myCurrentP.y = e.offsetY;
         myPrevP.x = myCurrentP.x;
@@ -304,6 +304,7 @@ let scketch = function(p){
     if(t == thisRenderer2dObj.canvas){
       myDragFlag = false;
       myData.drag = myDragFlag;
+      //myPrevを初期化
       myPrevP.x = -9999;
       myPrevP.y = -9999;
       //サーバーに送信
@@ -326,17 +327,17 @@ let scketch = function(p){
     //p.strokeCap(p.SQUARE);
     //p.strokeCap(p.PROJECT);
     p.noFill();
-    for(let i=0; i<lines.length; i++){
-      let line = lines[i];
+    for(let i=0; i<strokes.length; i++){
+      let stoke = strokes[i];
       p.push();
         p.noFill();
         p.beginShape();
-          for(let j = 0; j<line.length; j++){
-            if(line[j].pattern == 'path') {
-              let c = p.color(line[j].clr[0],line[j].clr[1],line[j].clr[2],line[j].clr[3]);
+          for(let j = 0; j<stoke.length; j++){
+            if(stoke[j].pattern == 'path') {
+              let c = p.color(stoke[j].clr[0],stoke[j].clr[1],stoke[j].clr[2],stoke[j].clr[3]);
               p.stroke(c);
-              p.strokeWeight(line[j].bdW);
-              p.vertex(line[j].mx,line[j].my);
+              p.strokeWeight(stoke[j].bdW);
+              p.vertex(stoke[j].mx,stoke[j].my);
             };
           }
         p.endShape();

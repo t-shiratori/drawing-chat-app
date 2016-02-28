@@ -49,7 +49,7 @@ io.on('connection', function (socket) {
 
   socket.on('pushUserStroke', function(){
     var socketid = socket.id;
-    io.to(roomName).emit('addToLines',socketid);
+    io.to(roomName).emit('addToStrokes',socketid);
   });
 
   socket.on('getClientInfo', function(userData){
