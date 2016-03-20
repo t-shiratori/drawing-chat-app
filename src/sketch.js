@@ -82,7 +82,7 @@ let scketch = function(p){
 
     selectBox = p.createSelect();
     selectBox.id('selectPattern');
-    selectBox.class('form-control');
+    selectBox.class('mdl-button selectBox');
     selectBox.option('line');
     selectBox.option('circle');
     selectBox.option('rect');
@@ -91,9 +91,9 @@ let scketch = function(p){
     selectBox.value('triangle');
     panelInnerBox.child(selectBox);
 
-    clearBtn = p.createButton('clear your canvas');
+    clearBtn = p.createButton('clear');
     clearBtn.id('clearBtn');
-    clearBtn.class('btn btn-default');
+    clearBtn.class('mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent');
     clearBtn.mouseClicked(clearCanvas);
     panelInnerBox.child(clearBtn);
 
@@ -107,6 +107,7 @@ let scketch = function(p){
 
     sliderAlpha = p.createSlider(0,255,100);
     sliderAlpha.id('sliderAlpha');
+    sliderAlpha.class('mdl-slider mdl-js-slider');
     panelInnerBox.child(sliderAlpha);
 
     ttlSliderBorderW = p.createP('border width');
@@ -115,6 +116,7 @@ let scketch = function(p){
 
     sliderBorderW = p.createSlider(1,40,1);
     sliderBorderW.id('sliderBorderW');
+    sliderBorderW.class('mdl-slider mdl-js-slider');
     panelInnerBox.child(sliderBorderW);
 
     //myColor = [p.floor(p.random(255)),p.floor(p.random(255)),p.floor(p.random(255)),100];
