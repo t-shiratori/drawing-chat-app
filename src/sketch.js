@@ -83,7 +83,6 @@ let scketch = function(p){
     selectBox = p.createSelect();
     selectBox.id('selectPattern');
     selectBox.class('form-control');
-    selectBox.option('path');
     selectBox.option('line');
     selectBox.option('circle');
     selectBox.option('rect');
@@ -122,6 +121,7 @@ let scketch = function(p){
     myColor = [0,0,0,sliderAlpha.value()];
     myPattern = selectBox.value();
     myData = {
+      socketId:myID,
       mx:myCurrentP.x,
       my:myCurrentP.y,
       pmx:myPrevP.x,
@@ -141,24 +141,16 @@ let scketch = function(p){
     ------------------------------------*/
     socket = io();
 
-    //サーバーから自分のidを受け取る
-    socket.on('setYourId',function(yourId){
-      myID = yourId;
-    });
-
-    //サーバーから、更新されたユーザーデータを受け取る
-    //対象ユーザーのストロークデータを初期化してstrokesに新規ストロークを追加
-    //strokesに全部ストロークデータを保持することで他のユーザーのストロークも描画できるようになる
-    socket.on('addToStrokes',function(id){
-      users[id] = [];//空にしているのではなく新しい配列オブジェクトを作成している。なので参照されるのは最新の配列オブジェクトだけ。
-      strokes = [];
-      strokes.push(users[id]);
+    //接続が成功すると実行される
+    socket.on("connect", function(){
+      myID = socket.id;
+      users[myID] = [];
     });
 
     //サーバーからユーザーデータを受け取る
     //ユーザーごとの更新データを追加する
     socket.on('getUserData',function(userData){
-      users[userData.id].push(userData);
+      users[userData.socketId] = userData;
       p.redraw();
     });
 
@@ -167,18 +159,6 @@ let scketch = function(p){
       let chatNum = document.getElementById('chatNum');
       chatNum.innerHTML = chatData.length;
     });
-
-    //
-    socket.on('resetMyData',function(id){
-      users[id] = [];
-      strokes = [];
-    });
-
-    //全員のキャンバスを初期化
-    // socket.on('clearCanvas',function(id){
-    //   users[id] = {};
-    // });
-
 
     //ウィンドウを閉じたらサーバーに通信切断を通知する
     socket.on('disconnect',function(){
@@ -195,24 +175,20 @@ let scketch = function(p){
     for(let key in users) {
       if(users.hasOwnProperty(key)) {
         //ユーザーの最新のストロークデータを参照してドローイングの場合分けする
-        let num = users[key].length - 1;
-        if(!users[key][num])return;
-        if(users[key][num].drag){
-          switch (users[key][num].pattern) {
-            case 'path':
-              drawPath();
-            break;
+        if(!users[key])return;
+        if(users[key].drag){
+          switch (users[key].pattern) {
             case 'line':
-              drawLine(users[key][num]);
+              drawLine(users[key]);
             break;
             case 'circle':
-              drawCircle(users[key][num]);
+              drawCircle(users[key]);
             break;
             case 'rect':
-              drawRectangle(users[key][num]);
+              drawRectangle(users[key]);
             break;
             case 'triangle':
-              drawTriangle(users[key][num]);
+              drawTriangle(users[key]);
             break;
           }
         }
@@ -276,6 +252,7 @@ let scketch = function(p){
 
       //データをセット
       myData = {
+        socketId:myID,
         mx:myCurrentP.x,
         my:myCurrentP.y,
         pmx:myPrevP.x,
@@ -322,30 +299,6 @@ let scketch = function(p){
   カスタムブラシ
 
   -----------------------*/
-  function drawPath(){
-    p.strokeCap(p.ROUND);
-    //p.strokeCap(p.SQUARE);
-    //p.strokeCap(p.PROJECT);
-    p.noFill();
-    for(let i=0; i<strokes.length; i++){
-      let stoke = strokes[i];
-      p.push();
-        p.noFill();
-        p.beginShape();
-          for(let j = 0; j<stoke.length; j++){
-            if(stoke[j].pattern == 'path') {
-              let c = p.color(stoke[j].clr[0],stoke[j].clr[1],stoke[j].clr[2],stoke[j].clr[3]);
-              p.stroke(c);
-              p.strokeWeight(stoke[j].bdW);
-              p.vertex(stoke[j].mx,stoke[j].my);
-            };
-          }
-        p.endShape();
-      p.pop();
-    }
-
-  }
-
   function drawTriangle(obj){
     let radius = 250;
     let c = p.color(obj.clr[0],obj.clr[1],obj.clr[2],obj.clr[3]);
@@ -425,8 +378,6 @@ let scketch = function(p){
   function clearCanvas(){
     users = {};//自分のとこだけ全部のユーザーのデータを初期化
     p.clear();
-    //socket.emit('clearCanvas');
-    socket.emit('resetMyData');
   }
 
 }

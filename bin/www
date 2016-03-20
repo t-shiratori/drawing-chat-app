@@ -28,52 +28,24 @@ var server = http.createServer(app);
  */
 var io = require('socket.io')(server);
 var roomName = 'room001';
-var clients = {};
 
 /**
  * ADDED!! Socket.IO Connection.
  */
 io.on('connection', function (socket) {
-  //console.log('connection');
 
+  //このソケットをroomNameルームにジョインする
   socket.join(roomName);
 
-  //console.log(socket);
-  //console.log(sockets.adapter.rooms);
-  //console.log(io.sockets.adapter.rooms[roomName]);
-  //console.log(sockets.adapter.rooms[roomName].length);
-
-  //io.to(socket.id).emit('init',socket.id);
-  io.to(socket.id).emit('setYourId',socket.id);
   io.to(roomName).emit('chatInfoUpdate',io.sockets.adapter.rooms[roomName]);
 
-  socket.on('pushUserStroke', function(){
-    var socketid = socket.id;
-    io.to(roomName).emit('addToStrokes',socketid);
-  });
-
   socket.on('getClientInfo', function(userData){
-    var socketid = socket.id;
-    userData.id = socketid;
     io.to(roomName).emit('getUserData',userData);
   });
 
-  socket.on('resetMyData', function(){
-    var socketid = socket.id;
-    io.to(roomName).emit('resetMyData',socketid);
-  });
-
-  // socket.on('clearCanvas', function(){
-  //   var socketid = socket.id;
-  //   io.to(roomName).emit('clearCanvas',socketid);
-  // });
-
   socket.on('disconnect', function (socket) {
     io.to(roomName).emit('chatInfoUpdate',io.sockets.adapter.rooms[roomName]);
-    //console.log('disconnect socketid: ',socket);
-    //console.log(io.sockets.adapter.rooms[roomName]);
   });
-
 
 });
 
