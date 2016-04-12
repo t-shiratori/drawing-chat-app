@@ -23,15 +23,14 @@ var server = http.createServer(app);
 
 
 
-/**
- * ADDED!! Require Socket.IO
- */
+/*
+
+ Socket.IO
+
+---------------------------------------------------------------*/
 var io = require('socket.io')(server);
 var roomName = 'room001';
 
-/**
- * ADDED!! Socket.IO Connection.
- */
 io.on('connection', function (socket) {
 
   //このソケットをroomNameルームにジョインする
@@ -48,6 +47,10 @@ io.on('connection', function (socket) {
   });
 
 });
+
+
+
+
 
 
 
